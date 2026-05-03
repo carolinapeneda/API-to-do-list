@@ -1,14 +1,14 @@
 import type { Request, Response } from "express";
 import { TarefaService } from "../services/TarefaService";
 
+const service = new TarefaService();
 class TarefaController {
     
-    create(req: Request, res: Response) {
+    async create(req: Request, res: Response) {
         try {
             const { title } = req.body;
-            const service = new TarefaService();
-            const tarefa = service.create({title});
-            return res.status(201).json(tarefa);
+            const task = await service.create(title);
+            return res.status(201).json(task);
         } catch(error) {
             if(error instanceof Error) { //verifica se erro é uma instancia da classe global
                 return res.status(400).json({erro: error.message});
@@ -17,39 +17,39 @@ class TarefaController {
         }
     }
 
-    list(req: Request, res: Response) {
+    async getAll(req: Request, res: Response) {
         const service = new TarefaService();
         const filtroCompleted = req.query.completed as string;
-        const tarefas = service.list(filtroCompleted);
+        const tarefas = await service.getAll(filtroCompleted);
         return res.status(200).json(tarefas);
     }
 
-    list_id(req: Request, res: Response) {
+    async getById(req: Request, res: Response) {
         const service = new TarefaService();
         const idDaTarefa = Number(req.params.id);
-        const tarefa = service.list_id(idDaTarefa);
+        const tarefa = await service.getById(idDaTarefa);
         if(!tarefa) {
             return res.status(404).json({erro: "Tarefa não encontrada!"});
         }
         return res.status(200).json(tarefa);
     }
 
-    update(req: Request, res: Response) {
+    async update(req: Request, res: Response) {
         const service = new TarefaService();
         const idTarefa = Number(req.params.id);
         const { title, completed } = req.body; 
-        const tarefaAtualizada = service.update(idTarefa, title, completed);
+        const tarefaAtualizada = await service.update(idTarefa, title, completed);
         if(!tarefaAtualizada) {
             return res.status(404).json({erro: "Tarefa não encontrada!"});
         }
         return res.status(200).json(tarefaAtualizada);
     }
 
-    delete(req: Request, res: Response) {
+    async delete(req: Request, res: Response) {
         const service = new TarefaService();
         const idTarefa = Number(req.params.id);
         
-        const deletou = service.delete(idTarefa);
+        const deletou = await service.delete(idTarefa);
 
         if(!deletou) {
             return res.status(404).json({erro: "Tarefa não encontrada!"});
